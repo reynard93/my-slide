@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Context optimization deck implementation notes</title>
+    <style>
+      :root { color-scheme: dark; --bg:#101418; --ink:#f6efe1; --muted:#a9b4bf; --panel:#171d23; --line:#34404b; --cyan:#7dd3fc; --lime:#a7f3d0; --amber:#f8d37a; --rose:#fda4af; }
+      body { margin:0; background:var(--bg); color:var(--ink); font:18px/1.55 -apple-system,BlinkMacSystemFont,"Avenir Next",system-ui,sans-serif; }
+      main { max-width:1040px; margin:0 auto; padding:64px 28px 96px; }
+      h1 { font-size:44px; line-height:1.05; margin:0 0 16px; letter-spacing:-0.04em; }
+      h2 { font-size:26px; margin:42px 0 12px; color:var(--cyan); }
+      p, li { color:var(--muted); }
+      strong { color:var(--ink); }
+      code { color:var(--lime); background:#0b0f13; padding:2px 6px; border-radius:6px; }
+      section { background:var(--panel); border:1px solid var(--line); border-radius:20px; padding:24px; margin-top:22px; }
+      .stamp { color:var(--amber); font-size:14px; text-transform:uppercase; letter-spacing:.12em; font-weight:800; }
+      a { color:var(--cyan); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="stamp">running notes · 2026-06-08</div>
+      <h1>Implementation notes</h1>
+      <p>This file records how the slide implementation interprets the brief while I keep iterating.</p>
+
+      <section>
+        <h2>Design decisions</h2>
+        <ul>
+          <li><strong>Deck register:</strong> treated as a technical sharing deck, not a product landing page. Visual direction: dark workshop / terminal lab with warm text, cyan/lime/amber accents, and diagrammatic layouts.</li>
+          <li><strong>Narrative weight:</strong> codebase context is the main arc. NotebookLM and web debugging are included as optional case studies, not the center of gravity.</li>
+          <li><strong>Starter repo location:</strong> kept inside <code>slides/context-optimization/assets/context-optimization-starter/</code> and bundled as <code>context-optimization-starter.zip</code>.</li>
+          <li><strong>Notes location:</strong> this file lives in slide assets to avoid adding extra top-level project docs.</li>
+          <li><strong>Visual polish:</strong> replaced repeated tiny section eyebrows with a small route chip beside titles. This keeps orientation without the standard AI landing-page scaffold.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Isolation decisions</h2>
+        <ul>
+          <li><strong>No setup mutation:</strong> I am not running install commands, global hooks, <code>graphify install</code>, Headroom proxies, AgentMemory servers, Browserbase sessions, or NotebookLM login.</li>
+          <li><strong>Starter defaults:</strong> the sync script now defaults to <code>.starter-output/drive-context/</code> inside the starter folder. It no longer writes to <code>../drive-context</code> unless a user explicitly passes that path.</li>
+          <li><strong>Temp verification:</strong> starter verification extracts the zip into a temp directory and runs the demo there, so the take-home flow is tested without touching your working setup.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Fact-check sources used</h2>
+        <ul>
+          <li><a href="https://github.com/safishamsi/graphify">safishamsi/graphify</a>: README confirms queryable graph over code/docs/PDF/images/video and outputs <code>graph.html</code>, <code>GRAPH_REPORT.md</code>, <code>graph.json</code>.</li>
+          <li><a href="https://github.com/parcadei/tldr-code">parcadei/tldr-code</a>: README confirms structure, calls, impact, dead, health, security, quality commands, JSON output, and 18 languages.</li>
+          <li><a href="https://github.com/rjkaes/trueline-mcp">rjkaes/trueline-mcp</a>: README confirms AST outline, targeted reads, hash-verified edits, atomic batches, and stale edit rejection.</li>
+          <li><a href="https://github.com/rtk-ai/rtk">rtk-ai/rtk</a> and <a href="https://github.com/JuliusBrussee/caveman">JuliusBrussee/caveman</a>: RTK filters command output; Caveman targets output-token reduction.</li>
+          <li><a href="https://github.com/chopratejas/headroom">chopratejas/headroom</a> and <a href="https://headroom-docs.vercel.app/docs/limitations">Headroom limitations</a>: README frames it as local proxy/wrapper/SDK/MCP compression for tool outputs, logs, files, RAG chunks, and conversation history; limitations note little value for short chats and code-only sessions.</li>
+          <li><a href="https://github.com/rohitg00/agentmemory">rohitg00/agentmemory</a>: README frames it as persistent memory for coding agents via MCP/hooks/REST across many clients.</li>
+          <li><a href="https://github.com/browserbase/stagehand">browserbase/stagehand</a> and <a href="https://www.browserbase.com/stagehand">Browserbase Stagehand page</a>: confirms act/extract/observe/agent and optional Browserbase cloud features.</li>
+          <li><a href="https://github.com/teng-lin/notebooklm-py">teng-lin/notebooklm-py</a>: README explicitly says unofficial and uses undocumented Google APIs.</li>
+          <li><a href="https://blog.fsck.com/2025/12/02/helping-agents-debug-webapps/">Helping agents debug webapps</a>: supports the console-log bridge case study.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Deviations</h2>
+        <ul>
+          <li><strong>Impeccable helper script:</strong> the local helper path <code>.claude/skills/impeccable/scripts/context.mjs</code> is not present in this repo. I used the loaded skill references directly instead of running local helper setup.</li>
+          <li><strong>Stagehand example:</strong> included as a skeleton only. It is not executed during verification because that would require dependencies and credentials outside the isolated starter.</li>
+          <li><strong>TDD:</strong> there is no application behavior change in the slide runtime. For the starter scripts, I used behavior checks in a temp extraction rather than adding a test framework dependency.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Tradeoffs</h2>
+        <ul>
+          <li><strong>Plain scripts over dependencies:</strong> the starter uses Node and Bash so people can inspect it quickly. The tradeoff is fewer platform niceties.</li>
+          <li><strong>Fact claims:</strong> slide copy avoids brittle benchmark numbers unless they are clearly repo claims. This keeps the talk useful if numbers change later.</li>
+          <li><strong>Slide density:</strong> tool facts are compressed into a receipts slide. That gives credibility without turning the deck into a README tour.</li>
+          <li><strong>Headroom placement:</strong> included as an optional live compression layer, not a replacement for Graphify's map or AgentMemory's recall. It earns its slot only when input tokens dominate.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Latest verification notes</h2>
+        <ul>
+          <li><strong>Hot reload:</strong> after editing slide copy and adding the implementation-notes link, the live deck on port 5174 updated without a browser restart.</li>
+          <li><strong>Screenshots taken:</strong> cover page and receipts page were captured through the browser agent. The receipts screenshot confirms the fact-check slide renders and includes the Graphify and NotebookLM claims.</li>
+          <li><strong>Isolation check:</strong> zip verification extracts to a temporary folder, runs the hook demo, doctor script, and sync script, then deletes the temp folder. The sync output stays under <code>.starter-output/drive-context/</code>.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Open questions</h2>
+        <ul>
+          <li>Should the final deck include a QR code or short URL for the starter zip?</li>
+          <li>Do you want one slide with exact Claude Code hook config, or keep the hook adapter generic?</li>
+          <li>Should the web debugging section mention the console bridge first even more strongly than Stagehand/Browserbase?</li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

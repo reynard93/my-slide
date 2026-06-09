@@ -1,0 +1,14 @@
+{
+  "name": "context-optimization-starter",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "doctor": "node scripts/doctor.mjs",
+    "route:demo": "node hooks/user-prompt-submit.mjs --demo \"where is the billing flow and what breaks if I refactor it?\"",
+    "route:prompt": "node hooks/user-prompt-submit.mjs",
+    "sync:once": "bash scripts/sync-md-html-to-txt.sh --once"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

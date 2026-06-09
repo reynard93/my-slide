@@ -1,0 +1,60 @@
+name: Deploy slide deck to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      # open-slide / Vite emit root-absolute /assets/ paths and expose no base
+      # flag. This deck is served from a project subpath (/<repo>/), so rebase
+      # the entry HTML + CSS to that subpath, add an SPA fallback, and disable
+      # Jekyll. Bundled assets resolved via import.meta.url are already correct.
+      - name: Rebase assets to repo subpath
+        run: |
+          base="/${GITHUB_REPOSITORY#*/}/"
+          find dist -type f \( -name '*.html' -o -name '*.js' -o -name '*.css' \) -print0 \
+            | xargs -0 perl -pi -e "s{(?<![\\w/-])/assets/}{${base}assets/}g"
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

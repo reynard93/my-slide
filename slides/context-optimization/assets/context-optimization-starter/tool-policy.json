@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "goal": "Route coding-agent context to the cheapest accurate surface before reading or editing files.",
+  "intentPatterns": [
+    "find",
+    "where",
+    "search",
+    "locate",
+    "how does",
+    "how is",
+    "what does",
+    "trace",
+    "impact",
+    "architecture",
+    "explain",
+    "analyze",
+    "callers",
+    "calls",
+    "depends",
+    "coupling",
+    "orphan",
+    "dead code",
+    "refactor",
+    "module",
+    "structure",
+    "hub"
+  ],
+  "ladder": [
+    {
+      "step": "compress",
+      "tools": ["rtk", "caveman", "headroom"],
+      "useWhen": "Command output, agent prose, tool results, logs, RAG chunks, or long sessions are noisy.",
+      "avoid": "Treating compression as code understanding. Headroom also adds a proxy or wrapper and may need retrieval round trips."
+    },
+    {
+      "step": "map",
+      "tools": ["graphify"],
+      "useWhen": "Question asks for architecture, paths, broad dependencies, or cross-document context.",
+      "avoid": "Opening random files before reading graphify-out/GRAPH_REPORT.md."
+    },
+    {
+      "step": "distill",
+      "tools": ["tldr-code"],
+      "useWhen": "Target file/function is roughly known and you need structure, calls, impact, dead code, health, or hotspots.",
+      "avoid": "Using raw grep for call graphs or reverse dependencies."
+    },
+    {
+      "step": "localize",
+      "tools": ["trueline", "hashline"],
+      "useWhen": "You need exact file context and are about to edit.",
+      "avoid": "Editing by guessed line numbers or stale reads."
+    },
+    {
+      "step": "remember",
+      "tools": ["agentmemory"],
+      "useWhen": "You discovered a durable decision, root cause, convention, or workflow rule.",
+      "avoid": "Saving temporary observations or sensitive data."
+    }
+  ],
+  "fallback": "Raw grep/find/read is last resort after structured tools are unavailable or too narrow."
+}
